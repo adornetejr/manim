@@ -128,7 +128,7 @@ class CoordinateSystem():
 
 class Axes(VGroup, CoordinateSystem):
     CONFIG = {
-        "number_line_config": {
+        "axis_config": {
             "color": LIGHT_GREY,
             "include_tip": True,
             "exclude_zero_from_default_numbers": True,
@@ -158,7 +158,7 @@ class Axes(VGroup, CoordinateSystem):
 
     def create_axis(self, min_val, max_val, axis_config):
         new_config = merge_dicts_recursively(
-            self.number_line_config,
+            self.axis_config,
             {"x_min": min_val, "x_max": max_val},
             axis_config,
         )
@@ -186,19 +186,19 @@ class Axes(VGroup, CoordinateSystem):
     def get_axes(self):
         return self.axes
 
-    def get_coordinate_labels(self, x_vals=None, y_vals=None):
+    def get_coordinate_labels(self, x_vals=None, y_vals=None, **kwargs):
         if x_vals is None:
             x_vals = []
         if y_vals is None:
             y_vals = []
-        x_mobs = self.get_x_axis().get_number_mobjects(*x_vals)
-        y_mobs = self.get_y_axis().get_number_mobjects(*y_vals)
+        x_mobs = self.get_x_axis().get_number_mobjects(*x_vals, **kwargs)
+        y_mobs = self.get_y_axis().get_number_mobjects(*y_vals, **kwargs)
 
         self.coordinate_labels = VGroup(x_mobs, y_mobs)
         return self.coordinate_labels
 
-    def add_coordinates(self, x_vals=None, y_vals=None):
-        self.add(self.get_coordinate_labels(x_vals, y_vals))
+    def add_coordinates(self, x_vals=None, y_vals=None, **kwargs):
+        self.add(self.get_coordinate_labels(x_vals, y_vals, **kwargs))
         return self
 
 
@@ -284,9 +284,7 @@ class NumberPlane(Axes):
     }
 
     def __init__(self, **kwargs):
-        digest_config(self, kwargs)
-        kwargs["number_line_config"] = self.axis_config
-        Axes.__init__(self, **kwargs)
+        super().__init__(**kwargs)
         self.init_background_lines()
 
     def init_background_lines(self):
@@ -343,7 +341,7 @@ class NumberPlane(Axes):
         for inputs in ranges:
             for k, x in enumerate(inputs):
                 new_line = line.copy()
-                new_line.move_to(axis2.number_to_point(x))
+                new_line.shift(axis2.number_to_point(x))
                 if k % (1 + ratio) == 0:
                     lines1.add(new_line)
                 else:
